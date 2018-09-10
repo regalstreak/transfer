@@ -16,7 +16,7 @@
                     v-for="item in files"
                     :key="item.title"
                     avatar
-                    @click="console.log(s)"
+                    @click="download"
                 >
                     <v-list-tile-avatar>
                     <v-icon :class="[item.iconClass]">{{ item.icon }}</v-icon>
@@ -28,7 +28,8 @@
                     </v-list-tile-content>
 
                     <v-list-tile-action>
-                    <v-btn icon ripple>
+                    <v-btn icon ripple
+                        @click="download">
                         <v-icon color="grey lighten-1">get_app</v-icon>
                     </v-btn>
                     </v-list-tile-action>
@@ -61,6 +62,11 @@ export default {
         }
       ]
     };
+  },
+  methods: {
+    download() {
+      window.location = "https://speed.hetzner.de/100MB.bin";
+    }
   }
 };
 </script>
