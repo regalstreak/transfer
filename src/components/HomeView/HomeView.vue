@@ -3,13 +3,14 @@
     <v-slide-y-transition mode="out-in">
       <v-layout column>
 
-        <div >
-            <v-btn round color="primary" dark>Upload</v-btn>
-        </div>
+        <v-layout row >
+          <v-btn round raised color="primary" dark @click="onPickFile">Upload</v-btn>
+          <input type="file" style="display: none" ref="fileInput" @change="onFilePicked" />
+        </v-layout>
 
         <space></space>
 
-        <div>
+        <v-layout column>
             <v-list light>
 
                 <v-list-tile
@@ -35,7 +36,7 @@
                     </v-list-tile-action>
                 </v-list-tile>
             </v-list>
-        </div>
+         </v-layout>
         
 
       </v-layout>
@@ -47,6 +48,8 @@
 export default {
   data() {
     return {
+      fileUrl: "",
+      file: null,
       files: [
         {
           icon: "assignment",
@@ -66,6 +69,27 @@ export default {
   methods: {
     download() {
       window.location = "https://speed.hetzner.de/100MB.bin";
+    },
+    onPickFile() {
+      this.$refs.fileInput.click();
+    },
+    onFilePicked(event) {
+      const files = event.target.files;
+      let filename = files[0].name;
+      if (filename.lastIndexOf(".") <= 0) {
+        return alert("Please add a valid file (No extension exception)");
+      }
+      const fileReader = new FileReader();
+      fileReader.addEventListener("load", () => {
+        this.fileUrl = fileReader.result;
+      });
+      fileReader.readAsDataURL(files[0]);
+      this.file = files[0];
+    },
+    uploadFile() {
+      if (!this.file) {
+        return;
+      }
     }
   }
 };
