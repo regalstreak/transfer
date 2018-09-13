@@ -18,14 +18,6 @@
 </template>
 
 <script>
-import Firebase from "firebase";
-import { config } from "./firebaseconf.js";
-
-let app = Firebase.initializeApp(config);
-let db = app.database();
-
-let booksRef = db.ref("books");
-
 export default {
   name: "App",
   data() {

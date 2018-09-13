@@ -9,10 +9,10 @@ import VueFire from "vuefire";
 
 Vue.config.productionTip = false;
 
-Vue.use(VueFire);
-
 new Vue({
   router,
   store,
   render: h => h(App)
 }).$mount("#app");
+
+Vue.use(VueFire);

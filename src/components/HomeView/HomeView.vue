@@ -4,7 +4,7 @@
       <v-layout column>
 
         <v-layout row >
-          <v-btn round raised color="primary" dark @click="onPickFile">Upload</v-btn>
+          <v-btn round raised color="primary" dark @click="uploadFile">Upload</v-btn>
           <input type="file" style="display: none" ref="fileInput" @change="onFilePicked" />
         </v-layout>
 
@@ -14,7 +14,7 @@
             <v-list light>
 
                 <v-list-tile
-                    v-for="item in files"
+                    v-for="item in testFiles"
                     :key="item.title"
                     avatar
                     @click="download"
@@ -45,12 +45,19 @@
 </template>
 
 <script>
+import { db } from "../../config/db.js";
 export default {
+  // firebase: {
+  //   fileRef: db.ref("uploadedFiles")
+  // },
   data() {
     return {
-      fileUrl: "",
       file: null,
-      files: [
+      newFile: {
+        url: "",
+        title: ""
+      },
+      testFiles: [
         {
           icon: "assignment",
           iconClass: "blue white--text",
@@ -74,22 +81,29 @@ export default {
       this.$refs.fileInput.click();
     },
     onFilePicked(event) {
-      const files = event.target.files;
-      let filename = files[0].name;
+      const browserFiles = event.target.files;
+      let filename = browserFiles[0].name;
       if (filename.lastIndexOf(".") <= 0) {
         return alert("Please add a valid file (No extension exception)");
       }
-      const fileReader = new FileReader();
-      fileReader.addEventListener("load", () => {
-        this.fileUrl = fileReader.result;
-      });
-      fileReader.readAsDataURL(files[0]);
-      this.file = files[0];
+      // const fileReader = new FileReader();
+      // fileReader.addEventListener("load", () => {
+      //   this.fileUrl = fileReader.result;
+      // });
+      // fileReader.readAsDataURL(files[0]);
+
+      this.file = browserFiles[0];
     },
     uploadFile() {
-      if (!this.file) {
-        return;
-      }
+      // if (!this.file) {
+      //   return;
+      // }
+      let filesRef = db.ref("uploadedFiles");
+      filesRef.push({
+        url: "testurl",
+        title: "Testtitle"
+      });
+      alert("Pushed");
     }
   }
 };
