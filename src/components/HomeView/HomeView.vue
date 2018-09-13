@@ -3,8 +3,10 @@
     <v-slide-y-transition mode="out-in">
       <v-layout column>
 
+        <p>DATA: {{ ourData }}</p>
+
         <v-layout row >
-          <v-text-field
+          <v-text-field 
             v-model="newFile.yourName"
             label="Your name"
             single-line
@@ -25,18 +27,18 @@
             <v-list light>
 
                 <v-list-tile
-                    v-for="item in testFiles"
-                    :key="item.title"
+                    v-for="item in ourData"
+                    :key="item.name"
                     avatar
                     @click="download"
                 >
                     <v-list-tile-avatar>
-                    <v-icon :class="[item.iconClass]">{{ item.icon }}</v-icon>
+                    <v-icon :class="[testFiles[0].iconClass]">{{ testFiles[0].icon }}</v-icon>
                     </v-list-tile-avatar>
 
                     <v-list-tile-content>
-                    <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-                    <v-list-tile-sub-title>{{ item.size }}</v-list-tile-sub-title>
+                    <v-list-tile-title>{{ item.name }}</v-list-tile-title>
+                    <v-list-tile-sub-title>{{ testFiles[0].size }}</v-list-tile-sub-title>
                     </v-list-tile-content>
 
                     <v-list-tile-action>
@@ -56,14 +58,12 @@
 </template>
 
 <script>
-import { db, storage } from "../../config/db.js";
+import { firestore, storage } from "../../config/db.js";
 export default {
-  // firebase: {
-  //   fileRef: db.ref("uploadedFiles")
-  // },
   data() {
     return {
-      file: null,
+      file: " ",
+      ourData: {},
       newFile: {
         yourName: "",
         url: "",
@@ -86,6 +86,13 @@ export default {
       ]
     };
   },
+
+  firestore() {
+    return {
+      ourData: firestore.collection("users")
+    };
+  },
+
   methods: {
     download() {
       window.location = "https://speed.hetzner.de/100MB.bin";
@@ -109,13 +116,13 @@ export default {
         storageRef.put(this.file);
       });
 
-      let filesRef = db.ref(this.newFile.yourName);
-      filesRef.push({
-        name: this.newFile.yourName,
-        url: this.newFile.url,
-        title: this.newFile.title,
-        fileName: this.newFile.fileName
-      });
+      // let filesRef = db.ref(this.newFile.yourName);
+      // filesRef.push({
+      //   name: this.newFile.yourName,
+      //   url: this.newFile.url,
+      //   title: this.newFile.title,
+      //   fileName: this.newFile.fileName
+      // });
       alert("Pushed");
     }
   }
