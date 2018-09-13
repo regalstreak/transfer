@@ -4,11 +4,24 @@
       <v-layout column>
 
         <v-layout row >
-          <v-btn round raised color="primary" dark @click="uploadFile">Upload</v-btn>
+          <v-text-field
+            v-model="newFile.yourName"
+            label="Your name"
+            single-line
+            solo
+            />
+
+          <v-text-field
+            v-model="newFile.title"
+            label="File title"
+            single-line
+            solo
+            />
+          <v-btn round raised color="primary" dark @click="onPickFile">Upload</v-btn>
           <input type="file" style="display: none" ref="fileInput" @change="onFilePicked" />
         </v-layout>
 
-        <v-layout column style="margin-top: 20px">
+        <v-layout column >
             <v-list light>
 
                 <v-list-tile
@@ -43,7 +56,7 @@
 </template>
 
 <script>
-import { db } from "../../config/db.js";
+import { db, storage } from "../../config/db.js";
 export default {
   // firebase: {
   //   fileRef: db.ref("uploadedFiles")
@@ -52,8 +65,10 @@ export default {
     return {
       file: null,
       newFile: {
+        yourName: "",
         url: "",
-        title: ""
+        title: "",
+        fileName: ""
       },
       testFiles: [
         {
@@ -79,27 +94,27 @@ export default {
       this.$refs.fileInput.click();
     },
     onFilePicked(event) {
-      const browserFiles = event.target.files;
-      let filename = browserFiles[0].name;
-      if (filename.lastIndexOf(".") <= 0) {
+      let browserFiles = event.target.files;
+
+      if (browserFiles[0].name.lastIndexOf(".") <= 0) {
         return alert("Please add a valid file (No extension exception)");
       }
-      // const fileReader = new FileReader();
-      // fileReader.addEventListener("load", () => {
-      //   this.fileUrl = fileReader.result;
-      // });
-      // fileReader.readAsDataURL(files[0]);
 
       this.file = browserFiles[0];
-    },
-    uploadFile() {
-      // if (!this.file) {
-      //   return;
-      // }
-      let filesRef = db.ref("uploadedFiles");
+
+      this.newFile.fileName = this.file.name;
+
+      this.$refs.fileInput.addEventListener("change", () => {
+        let storageRef = storage.ref(this.file.name);
+        storageRef.put(this.file);
+      });
+
+      let filesRef = db.ref(this.newFile.yourName);
       filesRef.push({
-        url: "testurl",
-        title: "Testtitle"
+        name: this.newFile.yourName,
+        url: this.newFile.url,
+        title: this.newFile.title,
+        fileName: this.newFile.fileName
       });
       alert("Pushed");
     }
