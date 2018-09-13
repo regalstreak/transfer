@@ -8,9 +8,7 @@
           <input type="file" style="display: none" ref="fileInput" @change="onFilePicked" />
         </v-layout>
 
-        <space></space>
-
-        <v-layout column>
+        <v-layout column style="margin-top: 20px">
             <v-list light>
 
                 <v-list-tile
@@ -114,9 +112,6 @@ export default {
 h1,
 h2 {
   font-weight: normal;
-}
-space {
-  margin-top: 20px;
 }
 ul {
   list-style-type: none;
