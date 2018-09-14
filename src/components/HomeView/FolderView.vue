@@ -39,15 +39,18 @@
 
 <script>
 import { firestore } from "../../config/db.js";
+import { mapState } from "vuex";
 
 export default {
   created() {
     this.getOurDataRealTime();
   },
+  computed: mapState(["currentItem"]),
   data() {
     return {
       file: " ",
       ourUsers: [],
+      ourUsersTest: [],
       ourData: {},
       moddedData: [],
       newFile: {

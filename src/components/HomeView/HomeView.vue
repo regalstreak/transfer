@@ -29,7 +29,7 @@
                     v-for="(item, index) in ourUsers"
                     :key="index"
                     avatar
-                    @click="navigate"
+                    @click="navigate(item)"
                 >
                     <v-list-tile-avatar>
                     <v-icon class="blue white--text">folder</v-icon>
@@ -59,11 +59,13 @@
 <script>
 import { firestore, storage } from "../../config/db.js";
 import firebase from "firebase";
+import { mapState, mapMutations } from "vuex";
 
 export default {
   created() {
     this.getOurDataRealTime();
   },
+  computed: mapState(["currentItem"]),
   data() {
     return {
       file: " ",
@@ -79,8 +81,12 @@ export default {
     };
   },
   methods: {
-    navigate() {
-      this.$router.push("/g");
+    ...mapMutations(["changeCurrentItem"]),
+
+    navigate(item) {
+      this.changeCurrentItem(item);
+      console.log(this.currentItem);
+      this.$router.push(item);
     },
     download() {
       window.location = "https://speed.hetzner.de/100MB.bin";

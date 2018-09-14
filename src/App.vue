@@ -21,11 +21,14 @@
 </template>
 
 <script>
+import { mapState, mapMutations } from "vuex";
+
 export default {
   name: "App",
   created() {
     this.checkHome();
   },
+  computed: mapState(["currentItem"]),
   data() {
     return {
       isHome: false,
@@ -39,12 +42,14 @@ export default {
     };
   },
   methods: {
+    ...mapMutations(["changeCurrentItem"]),
     back() {
       window.history.back();
     },
     checkHome() {
       if (!document.location.href.split("/").pop()) {
         this.isHome = true;
+        this.changeCurrentItem("");
       } else {
         this.isHome = false;
       }
