@@ -48,17 +48,8 @@ export default {
   computed: mapState(["currentItem"]),
   data() {
     return {
-      file: " ",
       ourUsers: [],
-      ourUsersTest: [],
-      ourData: {},
-      moddedData: [],
-      newFile: {
-        yourName: "",
-        url: "",
-        title: "",
-        fileName: ""
-      }
+      ourData: {}
     };
   },
   methods: {

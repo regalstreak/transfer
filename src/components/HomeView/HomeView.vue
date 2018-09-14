@@ -68,10 +68,9 @@ export default {
   computed: mapState(["currentItem"]),
   data() {
     return {
-      file: " ",
+      file: null,
       ourUsers: [],
       ourData: {},
-      moddedData: [],
       newFile: {
         yourName: "",
         url: "",
@@ -85,7 +84,6 @@ export default {
 
     navigate(item) {
       this.changeCurrentItem(item);
-      console.log(this.currentItem);
       this.$router.push(item);
     },
     download() {
@@ -169,8 +167,6 @@ export default {
         });
 
       alert("Pushed");
-
-      this.getOurDataRealTime();
     }
   }
 };
