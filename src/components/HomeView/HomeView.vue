@@ -102,6 +102,7 @@ export default {
       });
     },
     onFilePicked(event) {
+      // Upload file
       let browserFiles = event.target.files;
 
       if (browserFiles[0].name.lastIndexOf(".") <= 0) {
@@ -112,11 +113,50 @@ export default {
 
       this.newFile.fileName = this.file.name;
 
-      this.$refs.fileInput.addEventListener("change", () => {
-        let storageRef = storage.ref(this.file.name);
-        storageRef.put(this.file);
-      });
+      let storageRef = storage.ref("files/" + this.newFile.yourName);
+      let uploadTask = storageRef.child(this.file.name).put(this.file);
+      uploadTask.on(
+        "state_changed",
+        snapshot => {
+          // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
+          let progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+          }
+        },
+        error => {
+          switch (error.code) {
+            case "storage/unauthorized":
+              // User doesn't have permission to access the object
+              break;
 
+            case "storage/canceled":
+              // User canceled the upload
+              break;
+
+            case "storage/unknown":
+              // Unknown error occurred, inspect error.serverResponse
+              break;
+          }
+        },
+        () => {
+          // Upload completed successfully, now we can get the download URL
+          uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
+            console.log("File available at" + downloadURL);
+            this.newFile.url = downloadURL;
+            this.updateDB();
+          });
+        }
+      );
+    },
+    updateDB() {
       const usersRef = firestore.doc("users/" + this.newFile.yourName);
 
       usersRef
@@ -164,8 +204,6 @@ export default {
         .catch(error => {
           console.log("ERROR IS: " + error);
         });
-
-      alert("Pushed");
     }
   }
 };
