@@ -131,6 +131,7 @@ export default {
         .get()
         .then(userDoc => {
           if (userDoc.exists) {
+            console.log("EXIST");
             usersRef
               .update({
                 Files: firebase.firestore.FieldValue.arrayUnion({
@@ -141,7 +142,7 @@ export default {
                 })
               })
               .then(() => {
-                console.log("Status Saved");
+                console.log("Status Updated");
               })
               .catch(error => {
                 console.log("Got an error: " + error);
@@ -161,7 +162,7 @@ export default {
                 name: this.newFile.yourName
               })
               .then(() => {
-                console.log("Status Saved");
+                console.log("Status Pushed");
               })
               .catch(error => {
                 console.log("Got an error: " + error);
@@ -172,13 +173,6 @@ export default {
           console.log("ERROR IS: " + error);
         });
 
-      // let filesRef = db.ref(this.newFile.yourName);
-      // filesRef.push({
-      //   name: this.newFile.yourName,
-      //   url: this.newFile.url,
-      //   title: this.newFile.title,
-      //   fileName: this.newFile.fileName
-      // });
       alert("Pushed");
     }
   }
