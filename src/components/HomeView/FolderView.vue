@@ -7,18 +7,18 @@
             <v-list light>
 
                 <v-list-tile
-                    v-for="(item, index) in ourUsers"
+                    v-for="(item, index) in ourFiles"
                     :key="index"
                     avatar
-                    @click="download"
+                    @click="download(item)"
                 >
                     <v-list-tile-avatar>
                     <v-icon class="blue white--text">folder</v-icon>
                     </v-list-tile-avatar>
 
                     <v-list-tile-content>
-                    <v-list-tile-title>{{ item }}</v-list-tile-title>
-                    <v-list-tile-sub-title>10 KiB</v-list-tile-sub-title>
+                    <v-list-tile-title>{{ item.title }}</v-list-tile-title>
+                    <v-list-tile-sub-title>{{ item.size }}</v-list-tile-sub-title>
                     </v-list-tile-content>
 
                     <v-list-tile-action>
@@ -30,7 +30,6 @@
                 </v-list-tile>
             </v-list>
          </v-layout>
-        
 
       </v-layout>
     </v-slide-y-transition>
@@ -39,31 +38,36 @@
 
 <script>
 import { firestore } from "../../config/db.js";
-import { mapState } from "vuex";
+import { mapState, mapMutations } from "vuex";
 
 export default {
   created() {
     this.getOurDataRealTime();
+    this.changeCurrentItem(document.location.href.split("/").pop());
   },
   computed: mapState(["currentItem"]),
   data() {
     return {
-      ourUsers: [],
-      ourData: {}
+      ourFiles: []
     };
   },
   methods: {
-    download() {
-      window.location = "https://speed.hetzner.de/100MB.bin";
+    ...mapMutations(["changeCurrentItem"]),
+
+    download(item) {
+      if (item.url) {
+        window.location = item.url;
+      }
     },
     getOurDataRealTime() {
-      firestore.collection("users").onSnapshot(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          if (this.ourUsers.indexOf(doc.id) === -1) {
-            this.ourUsers.push(doc.id);
-          }
-          this.ourUsers.sort();
-        });
+      firestore.doc("users/" + this.currentItem).onSnapshot(querySnapshot => {
+        if (querySnapshot.exists) {
+          this.ourFiles = querySnapshot.data().Files;
+          console.log(this.ourFiles);
+          console.log("Document data:", querySnapshot.data());
+        } else {
+          console.log("No such document!");
+        }
       });
     }
   }

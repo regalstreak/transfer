@@ -63,14 +63,13 @@ import { mapState, mapMutations } from "vuex";
 
 export default {
   created() {
-    this.getOurDataRealTime();
+    this.getOurUsersRealTime();
   },
   computed: mapState(["currentItem"]),
   data() {
     return {
       file: null,
       ourUsers: [],
-      ourData: {},
       newFile: {
         yourName: "",
         url: "",
@@ -92,7 +91,7 @@ export default {
     onPickFile() {
       this.$refs.fileInput.click();
     },
-    getOurDataRealTime() {
+    getOurUsersRealTime() {
       firestore.collection("users").onSnapshot(querySnapshot => {
         querySnapshot.forEach(doc => {
           if (this.ourUsers.indexOf(doc.id) === -1) {
