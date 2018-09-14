@@ -4,6 +4,8 @@
       <v-layout column>
 
         <p>DATA: {{ ourData }}</p>
+        <p>TESTFILES: {{ testFiles }}</p>
+        <p>moddedData: {{ moddedData }}</p>
 
         <v-layout row >
           <v-text-field 
@@ -27,17 +29,17 @@
             <v-list light>
 
                 <v-list-tile
-                    v-for="item in ourData"
-                    :key="item.name"
+                    v-for="(item, index) in testFiles"
+                    :key="index"
                     avatar
                     @click="download"
                 >
                     <v-list-tile-avatar>
-                    <v-icon :class="[testFiles[0].iconClass]">{{ testFiles[0].icon }}</v-icon>
+                    <v-icon :class="[item.iconClass]">{{ testFiles[0].icon }}</v-icon>
                     </v-list-tile-avatar>
 
                     <v-list-tile-content>
-                    <v-list-tile-title>{{ item.name }}</v-list-tile-title>
+                    <v-list-tile-title>{{ item.title }}</v-list-tile-title>
                     <v-list-tile-sub-title>{{ testFiles[0].size }}</v-list-tile-sub-title>
                     </v-list-tile-content>
 
@@ -59,11 +61,25 @@
 
 <script>
 import { firestore, storage } from "../../config/db.js";
+import firebase from "firebase";
+
 export default {
+  created() {
+    firestore
+      .collection("users")
+      .get()
+      .then(querySnapshot => {
+        console.log(querySnapshot);
+        querySnapshot.forEach(doc => {
+          console.log(`${doc.id} => ${doc.data()}`);
+        });
+      });
+  },
   data() {
     return {
       file: " ",
       ourData: {},
+      moddedData: [],
       newFile: {
         yourName: "",
         url: "",
@@ -86,13 +102,6 @@ export default {
       ]
     };
   },
-
-  firestore() {
-    return {
-      ourData: firestore.collection("users")
-    };
-  },
-
   methods: {
     download() {
       window.location = "https://speed.hetzner.de/100MB.bin";
@@ -115,6 +124,53 @@ export default {
         let storageRef = storage.ref(this.file.name);
         storageRef.put(this.file);
       });
+
+      const usersRef = firestore.doc("users/" + this.newFile.yourName);
+
+      usersRef
+        .get()
+        .then(userDoc => {
+          if (userDoc.exists) {
+            usersRef
+              .update({
+                Files: firebase.firestore.FieldValue.arrayUnion({
+                  name: this.newFile.yourName,
+                  url: this.newFile.url,
+                  title: this.newFile.title,
+                  fileName: this.newFile.fileName
+                })
+              })
+              .then(() => {
+                console.log("Status Saved");
+              })
+              .catch(error => {
+                console.log("Got an error: " + error);
+              });
+          } else {
+            console.log("NOT EXIST");
+            usersRef
+              .set({
+                Files: [
+                  {
+                    name: this.newFile.yourName,
+                    url: this.newFile.url,
+                    title: this.newFile.title,
+                    fileName: this.newFile.fileName
+                  }
+                ],
+                name: this.newFile.yourName
+              })
+              .then(() => {
+                console.log("Status Saved");
+              })
+              .catch(error => {
+                console.log("Got an error: " + error);
+              });
+          }
+        })
+        .catch(error => {
+          console.log("ERROR IS: " + error);
+        });
 
       // let filesRef = db.ref(this.newFile.yourName);
       // filesRef.push({
