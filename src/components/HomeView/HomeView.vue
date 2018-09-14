@@ -3,9 +3,6 @@
     <v-slide-y-transition mode="out-in">
       <v-layout column>
 
-        <p>DATA: {{ ourData }}</p>
-        <p>TESTFILES: {{ testFiles }}</p>
-        <p>moddedData: {{ moddedData }}</p>
 
         <v-layout row >
           <v-text-field 
@@ -29,18 +26,18 @@
             <v-list light>
 
                 <v-list-tile
-                    v-for="(item, index) in testFiles"
+                    v-for="(item, index) in ourUsers"
                     :key="index"
                     avatar
-                    @click="download"
+                    @click="navigate"
                 >
                     <v-list-tile-avatar>
-                    <v-icon :class="[item.iconClass]">{{ testFiles[0].icon }}</v-icon>
+                    <v-icon class="blue white--text">folder</v-icon>
                     </v-list-tile-avatar>
 
                     <v-list-tile-content>
-                    <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-                    <v-list-tile-sub-title>{{ testFiles[0].size }}</v-list-tile-sub-title>
+                    <v-list-tile-title>{{ item }}</v-list-tile-title>
+                    <v-list-tile-sub-title>10 KiB</v-list-tile-sub-title>
                     </v-list-tile-content>
 
                     <v-list-tile-action>
@@ -65,19 +62,12 @@ import firebase from "firebase";
 
 export default {
   created() {
-    firestore
-      .collection("users")
-      .get()
-      .then(querySnapshot => {
-        console.log(querySnapshot);
-        querySnapshot.forEach(doc => {
-          console.log(`${doc.id} => ${doc.data()}`);
-        });
-      });
+    this.getOurDataRealTime();
   },
   data() {
     return {
       file: " ",
+      ourUsers: [],
       ourData: {},
       moddedData: [],
       newFile: {
@@ -85,29 +75,28 @@ export default {
         url: "",
         title: "",
         fileName: ""
-      },
-      testFiles: [
-        {
-          icon: "assignment",
-          iconClass: "blue white--text",
-          title: "Vacation itinerary",
-          size: "5kb"
-        },
-        {
-          icon: "call_to_action",
-          iconClass: "amber white--text",
-          title: "Kitchen remodel",
-          size: "10kb"
-        }
-      ]
+      }
     };
   },
   methods: {
+    navigate() {
+      this.$router.push("/g");
+    },
     download() {
       window.location = "https://speed.hetzner.de/100MB.bin";
     },
     onPickFile() {
       this.$refs.fileInput.click();
+    },
+    getOurDataRealTime() {
+      firestore.collection("users").onSnapshot(querySnapshot => {
+        querySnapshot.forEach(doc => {
+          if (this.ourUsers.indexOf(doc.id) === -1) {
+            this.ourUsers.push(doc.id);
+          }
+          this.ourUsers.sort();
+        });
+      });
     },
     onFilePicked(event) {
       let browserFiles = event.target.files;
@@ -130,7 +119,7 @@ export default {
       usersRef
         .get()
         .then(userDoc => {
-          if (userDoc.exists) {
+          if (userDoc && userDoc.exists) {
             console.log("EXIST");
             usersRef
               .update({
@@ -174,6 +163,8 @@ export default {
         });
 
       alert("Pushed");
+
+      this.getOurDataRealTime();
     }
   }
 };

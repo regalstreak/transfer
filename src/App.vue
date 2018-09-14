@@ -5,6 +5,9 @@
       app
       :clipped-left="clipped"
     >
+      <v-toolbar-side-icon v-if="isHome == false" @click="back">
+        <v-icon dark>chevron_left</v-icon>
+      </v-toolbar-side-icon>
       <v-toolbar-title v-text="title"></v-toolbar-title>
       <v-spacer></v-spacer>
     </v-toolbar>
@@ -20,8 +23,12 @@
 <script>
 export default {
   name: "App",
+  created() {
+    this.checkHome();
+  },
   data() {
     return {
+      isHome: false,
       clipped: false,
       drawer: false,
       fixed: false,
@@ -30,6 +37,23 @@ export default {
       rightDrawer: false,
       title: "Transfer"
     };
+  },
+  methods: {
+    back() {
+      window.history.back();
+    },
+    checkHome() {
+      if (!document.location.href.split("/").pop()) {
+        this.isHome = true;
+      } else {
+        this.isHome = false;
+      }
+    }
+  },
+  watch: {
+    $route: function() {
+      this.checkHome();
+    }
   }
 };
 </script>
