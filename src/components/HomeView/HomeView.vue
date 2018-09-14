@@ -3,6 +3,11 @@
     <v-slide-y-transition mode="out-in">
       <v-layout column>
 
+        <v-progress-linear 
+          ref="progressBar" 
+          v-if="percentBar > -1"
+          v-model="percentBar">
+        </v-progress-linear>
 
         <v-layout row >
           <v-text-field 
@@ -75,7 +80,8 @@ export default {
         url: "",
         title: "",
         fileName: ""
-      }
+      },
+      percentBar: -1
     };
   },
   methods: {
@@ -121,7 +127,7 @@ export default {
           // Get task progress, including the number of bytes uploaded and the total number of bytes to be uploaded
           let progress =
             (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload is " + progress + "% done");
+          this.percentBar = progress;
           switch (snapshot.state) {
             case "paused":
               console.log("Upload is paused");
