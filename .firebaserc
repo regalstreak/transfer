@@ -1,5 +1,6 @@
 {
   "projects": {
-    "transfer": "transfer-2e740"
+    "transfer": "transfer-2e740",
+    "default": "transfer-2e740"
   }
 }
