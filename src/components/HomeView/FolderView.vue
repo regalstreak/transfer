@@ -13,18 +13,18 @@
                     @click="download(item)"
                 >
                     <v-list-tile-avatar>
-                    <v-icon class="blue white--text">folder</v-icon>
+                    <v-icon class="blue white--text">assignment</v-icon>
                     </v-list-tile-avatar>
 
                     <v-list-tile-content>
-                    <v-list-tile-title>{{ item.title }}</v-list-tile-title>
-                    <v-list-tile-sub-title>{{ item.size }}</v-list-tile-sub-title>
+                    <v-list-tile-title>{{ item.fileName }}</v-list-tile-title>
+                    <v-list-tile-sub-title>{{ item.fileSize }}</v-list-tile-sub-title>
                     </v-list-tile-content>
 
                     <v-list-tile-action>
                     <v-btn icon ripple
-                        @click="download">
-                        <v-icon color="grey lighten-1">get_app</v-icon>
+                        @click="info(item)">
+                        <v-icon color="grey lighten-1">info</v-icon>
                     </v-btn>
                     </v-list-tile-action>
                 </v-list-tile>
@@ -54,9 +54,12 @@ export default {
   methods: {
     ...mapMutations(["changeCurrentItem"]),
 
+    info(item) {
+      console.log(item.fileSize);
+    },
     download(item) {
-      if (item.url) {
-        window.location = item.url;
+      if (item.fileUrl) {
+        window.location = item.fileUrl;
       }
     },
     getOurDataRealTime() {

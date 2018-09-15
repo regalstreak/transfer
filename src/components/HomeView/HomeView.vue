@@ -18,7 +18,7 @@
             />
 
           <v-text-field
-            v-model="newFile.title"
+            v-model="newFile.fileTitle"
             label="File title"
             single-line
             solo
@@ -37,20 +37,13 @@
                     @click="navigate(item)"
                 >
                     <v-list-tile-avatar>
-                    <v-icon class="blue white--text">folder</v-icon>
+                      <v-icon class="blue white--text">folder</v-icon>
                     </v-list-tile-avatar>
 
                     <v-list-tile-content>
-                    <v-list-tile-title>{{ item }}</v-list-tile-title>
-                    <v-list-tile-sub-title>10 KiB</v-list-tile-sub-title>
+                      <v-list-tile-title>{{ item }}</v-list-tile-title>
+                      <v-list-tile-sub-title>Folder</v-list-tile-sub-title>
                     </v-list-tile-content>
-
-                    <v-list-tile-action>
-                    <v-btn icon ripple
-                        @click="download">
-                        <v-icon color="grey lighten-1">get_app</v-icon>
-                    </v-btn>
-                    </v-list-tile-action>
                 </v-list-tile>
             </v-list>
          </v-layout>
@@ -77,9 +70,10 @@ export default {
       ourUsers: [],
       newFile: {
         yourName: "",
-        url: "",
-        title: "",
-        fileName: ""
+        fileUrl: "0",
+        fileTitle: "",
+        fileName: "",
+        fileSize: "0"
       },
       percentBar: -1
     };
@@ -90,9 +84,6 @@ export default {
     navigate(item) {
       this.changeCurrentItem(item);
       this.$router.push(item);
-    },
-    download() {
-      window.location = "https://speed.hetzner.de/100MB.bin";
     },
     onPickFile() {
       this.$refs.fileInput.click();
@@ -153,12 +144,40 @@ export default {
           }
         },
         () => {
+          console.log("H");
           // Upload completed successfully, now we can get the download URL
-          uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
-            console.log("File available at" + downloadURL);
-            this.newFile.url = downloadURL;
-            this.updateDB();
-          });
+          let getUrlAndSize = () => {
+            console.log("RUNNING GETURLANDSIZE");
+            uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
+              console.log(
+                "File available at" + downloadURL + "or " + this.newFile.fileUrl
+              );
+              this.newFile.fileUrl = downloadURL;
+              this.updateDB();
+            });
+            uploadTask.snapshot.ref.getMetadata().then(metadata => {
+              console.log(metadata.size);
+              if (metadata.size < 1000) {
+                this.newFile.fileSize = metadata.size + " B";
+              } else if (metadata.size >= 1000 && metadata.size < 1000000) {
+                this.newFile.fileSize = metadata.size / 1000 + " KiB";
+              } else if (metadata.size >= 1000000) {
+                this.newFile.fileSize = metadata.size / 1000000 + " MiB";
+              }
+
+              this.updateDB();
+            });
+
+            // if (this.newFile.fileSize != "0" && this.newFile.fileUrl != "0") {
+            //   console.log("Updating db");
+            //   this.updateDB();
+            // } else {
+            //   console.log("isnull");
+            //   setTimeout(getUrlAndSize(), 250);
+            // }
+          };
+
+          getUrlAndSize();
         }
       );
     },
@@ -173,10 +192,11 @@ export default {
             usersRef
               .update({
                 Files: firebase.firestore.FieldValue.arrayUnion({
-                  name: this.newFile.yourName,
-                  url: this.newFile.url,
-                  title: this.newFile.title,
-                  fileName: this.newFile.fileName
+                  yourName: this.newFile.yourName,
+                  fileUrl: this.newFile.fileUrl,
+                  fileTitle: this.newFile.fileTitle,
+                  fileName: this.newFile.fileName,
+                  fileSize: this.newFile.fileSize
                 })
               })
               .then(() => {
@@ -191,10 +211,11 @@ export default {
               .set({
                 Files: [
                   {
-                    name: this.newFile.yourName,
-                    url: this.newFile.url,
-                    title: this.newFile.title,
-                    fileName: this.newFile.fileName
+                    yourName: this.newFile.yourName,
+                    fileUrl: this.newFile.fileUrl,
+                    fileTitle: this.newFile.fileTitle,
+                    fileName: this.newFile.fileName,
+                    fileSize: this.newFile.fileSize
                   }
                 ],
                 name: this.newFile.yourName
