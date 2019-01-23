@@ -2,61 +2,44 @@
   <v-container fluid>
     <v-slide-y-transition mode="out-in">
       <v-layout column>
+        <v-progress-linear ref="progressBar" v-if="percentBar > -1" v-model="percentBar"></v-progress-linear>
 
-        <v-progress-linear 
-          ref="progressBar" 
-          v-if="percentBar > -1"
-          v-model="percentBar">
-        </v-progress-linear>
+        <v-layout row>
+          <v-text-field v-model="newFile.yourName" label="Your name" single-line solo/>
 
-        <v-layout row >
-          <v-text-field 
-            v-model="newFile.yourName"
-            label="Your name"
-            single-line
-            solo
-            />
-
-          <v-text-field
-            v-model="newFile.fileTitle"
-            label="File title"
-            single-line
-            solo
-            />
+          <v-text-field v-model="newFile.fileTitle" label="File title" single-line solo/>
           <v-btn round raised color="primary" dark @click="onPickFile">Upload</v-btn>
-          <input type="file" style="display: none" ref="fileInput" @change="onFilePicked" />
+          <input type="file" style="display: none" ref="fileInput" @change="onFilePicked">
         </v-layout>
 
-        <v-layout column >
-            <v-list light>
+        <v-layout column>
+          <v-list light>
+            <v-list-tile
+              v-for="(item, index) in ourUsers"
+              :key="index"
+              avatar
+              @click="navigate(item)"
+            >
+              <v-list-tile-avatar>
+                <v-icon class="blue white--text">folder</v-icon>
+              </v-list-tile-avatar>
 
-                <v-list-tile
-                    v-for="(item, index) in ourUsers"
-                    :key="index"
-                    avatar
-                    @click="navigate(item)"
-                >
-                    <v-list-tile-avatar>
-                      <v-icon class="blue white--text">folder</v-icon>
-                    </v-list-tile-avatar>
-
-                    <v-list-tile-content>
-                      <v-list-tile-title>{{ item }}</v-list-tile-title>
-                      <v-list-tile-sub-title>Folder</v-list-tile-sub-title>
-                    </v-list-tile-content>
-                </v-list-tile>
-            </v-list>
-         </v-layout>
-        
-
+              <v-list-tile-content>
+                <v-list-tile-title>{{ item }}</v-list-tile-title>
+                <v-list-tile-sub-title>Folder</v-list-tile-sub-title>
+              </v-list-tile-content>
+            </v-list-tile>
+          </v-list>
+        </v-layout>
       </v-layout>
     </v-slide-y-transition>
   </v-container>
 </template>
 
 <script>
-import { firestore, storage } from "../../config/db.js";
-import firebase from "firebase";
+import "firebase/firestore";
+import "firebase/storage";
+import firebaseInstance from "../../config/db.js";
 import { mapState, mapMutations } from "vuex";
 
 export default {
@@ -89,14 +72,17 @@ export default {
       this.$refs.fileInput.click();
     },
     getOurUsersRealTime() {
-      firestore.collection("users").onSnapshot(querySnapshot => {
-        querySnapshot.forEach(doc => {
-          if (this.ourUsers.indexOf(doc.id) === -1) {
-            this.ourUsers.push(doc.id);
-          }
-          this.ourUsers.sort();
+      firebaseInstance
+        .firestore()
+        .collection("users")
+        .onSnapshot(querySnapshot => {
+          querySnapshot.forEach(doc => {
+            if (this.ourUsers.indexOf(doc.id) === -1) {
+              this.ourUsers.push(doc.id);
+            }
+            this.ourUsers.sort();
+          });
         });
-      });
     },
     onFilePicked(event) {
       // Upload file
@@ -110,7 +96,9 @@ export default {
 
       this.newFile.fileName = this.file.name;
 
-      let storageRef = storage.ref("files/" + this.newFile.yourName);
+      let storageRef = firebaseInstance
+        .storage()
+        .ref("files/" + this.newFile.yourName);
       let uploadTask = storageRef.child(this.file.name).put(this.file);
       uploadTask.on(
         "state_changed",
@@ -182,7 +170,9 @@ export default {
       );
     },
     updateDB() {
-      const usersRef = firestore.doc("users/" + this.newFile.yourName);
+      const usersRef = firebaseInstance
+        .firestore()
+        .doc("users/" + this.newFile.yourName);
 
       usersRef
         .get()
@@ -191,7 +181,7 @@ export default {
             console.log("EXIST");
             usersRef
               .update({
-                Files: firebase.firestore.FieldValue.arrayUnion({
+                Files: firebaseInstance.firestore().FieldValue.arrayUnion({
                   yourName: this.newFile.yourName,
                   fileUrl: this.newFile.fileUrl,
                   fileTitle: this.newFile.fileTitle,
