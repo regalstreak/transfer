@@ -5,9 +5,9 @@
         <v-progress-linear ref="progressBar" v-if="percentBar > -1" v-model="percentBar"></v-progress-linear>
 
         <v-layout row>
-          <v-text-field v-model="newFile.yourName" label="Your name" single-line solo/>
+          <v-text-field v-model="newFile.yourName" label="Folder name" single-line solo/>
 
-          <v-text-field v-model="newFile.fileTitle" label="File title" single-line solo/>
+          <v-text-field v-model="newFile.fileTitle" label="File title (random chalega)" single-line solo/>
           <v-btn round raised color="primary" dark @click="onPickFile">Upload</v-btn>
           <input type="file" style="display: none" ref="fileInput" @change="onFilePicked">
         </v-layout>
